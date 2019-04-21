@@ -38,8 +38,11 @@ Before using ACLs you may want to ask yourself what's the goal you want to
 accomplish by implementing this layer of protection. Normally there are
 two main goals that are well served by ACLs:
 
-1. You want to improve security by restricting the access to commands and keys, so that untrusted clients have no access and trusted clients have just the minimum access level to the database in order to perform the work needed. For instance certain clients may just be able to execute read only commands.
-2. You want to improve operational safety, so that processes or humans accessing Redis are not allowed, because of software errors or manual mistakes, to damage the data or the configuration. For instance there is no reason for a worker that fetches delayed jobs from Redis to be able to call the `FLUSHALL` command.
+1. You want to improve security by restricting the access to commands and keys, so that untrusted clients have no access and trusted clients have just the minimum access level to the database in order to perform the work needed. 
+For instance certain clients may just be able to execute read only commands.
+
+2. You want to improve operational safety, so that processes or humans accessing Redis are not allowed, because of software errors or manual mistakes, to damage the data or the configuration. 
+For instance there is no reason for a worker that fetches delayed jobs from Redis to be able to call the `FLUSHALL` command.
 
 Another typical usage of ACLs is related to managed Redis instances. Redis is
 often provided as a managed service both by internal company teams that handle

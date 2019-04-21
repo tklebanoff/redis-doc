@@ -26,7 +26,10 @@ implementation for the sake of following the article better).
 
 What is a key-value store?
 ---
-The essence of a key-value store is the ability to store some data, called a _value_, inside a key. The value can be retrieved later only if we know the specific key it was stored in. There is no direct way to search for a key by value. In some sense, it is like a very large hash/dictionary, but it is persistent, i.e. when your application ends, the data doesn't go away. So, for example, I can use the command `SET` to store the value *bar* in the key *foo*:
+The essence of a key-value store is the ability to store some data, called a _value_, inside a key. 
+The value can be retrieved later only if we know the specific key it was stored in. 
+There is no direct way to search for a key by value. In some sense, it is like a very large hash/dictionary, but it is persistent, i.e. when your application ends, the data doesn't go away. 
+So, for example, I can use the command `SET` to store the value *bar* in the key *foo*:
 
     SET foo bar
 
@@ -34,7 +37,8 @@ Redis stores data permanently, so if I later ask "_What is the value stored in k
 
     GET foo => bar
 
-Other common operations provided by key-value stores are `DEL`, to delete a given key and its associated value, SET-if-not-exists (called `SETNX` on Redis), to assign a value to a key only if the key does not already exist, and `INCR`, to atomically increment a number stored in a given key:
+Other common operations provided by key-value stores are `DEL`, to delete a given key and its associated value, 
+SET-if-not-exists (called `SETNX` on Redis), to assign a value to a key only if the key does not already exist, and `INCR`, to atomically increment a number stored in a given key:
 
     SET foo 10
     INCR foo => 11
@@ -59,26 +63,35 @@ The problem is that incrementing this way will work as long as there is only one
     SET foo x (foo is now 11)
     SET foo y (foo is now 11)
 
-Something is wrong! We incremented the value two times, but instead of going from 10 to 12, our key holds 11. This is because the increment done with `GET / increment / SET` *is not an atomic operation*. Instead the INCR provided by Redis, Memcached, ..., are atomic implementations, and the server will take care of protecting the key during the time needed to complete the increment in order to prevent simultaneous accesses.
+Something is wrong! We incremented the value two times, but instead of going from 10 to 12, our key holds 11. This is because the increment done with `GET / increment / SET` *is not an atomic operation*. 
+Instead the INCR provided by Redis, Memcached, ..., are atomic implementations, and the server will take care of protecting the key during the time needed to complete the increment in order to prevent simultaneous accesses.
 
-What makes Redis different from other key-value stores is that it provides other operations similar to INCR that can be used to model complex problems. This is why you can use Redis to write whole web applications without using another database like an SQL database, and without going crazy.
+What makes Redis different from other key-value stores is that it provides other operations similar to INCR that can be used to model complex problems. 
+This is why you can use Redis to write whole web applications without using another database like an SQL database, and without going crazy.
 
 Beyond key-value stores: lists
 ---
 
-In this section we will see which Redis features we need to build our Twitter clone. The first thing to know is that Redis values can be more than strings. Redis supports Lists, Sets, Hashes, Sorted Sets, Bitmaps, and HyperLogLog types as values, and there are atomic operations to operate on them so we are safe even with multiple accesses to the same key. Let's start with Lists:
+In this section we will see which Redis features we need to build our Twitter clone. The first thing to know is that Redis values can be more than strings. 
+Redis supports Lists, Sets, Hashes, Sorted Sets, Bitmaps, and HyperLogLog types as values, and there are atomic operations to operate on them so we are safe even with multiple accesses to the same key. 
+Let's start with Lists:
 
     LPUSH mylist a (now mylist holds 'a')
     LPUSH mylist b (now mylist holds 'b','a')
     LPUSH mylist c (now mylist holds 'c','b','a')
 
-`LPUSH` means _Left Push_, that is, add an element to the left (or to the head) of the list stored in _mylist_. If the key _mylist_ does not exist it is automatically created as an empty list before the PUSH operation. As you can imagine, there is also an `RPUSH` operation that adds the element to the right of the list (on the tail). This is very useful for our Twitter clone. User updates can be added to a list stored in `username:updates`, for instance.
+`LPUSH` means _Left Push_, that is, add an element to the left (or to the head) of the list stored in _mylist_. 
+If the key _mylist_ does not exist it is automatically created as an empty list before the PUSH operation. 
+As you can imagine, there is also an `RPUSH` operation that adds the element to the right of the list (on the tail). 
+This is very useful for our Twitter clone. User updates can be added to a list stored in `username:updates`, for instance.
 
 There are operations to get data from Lists, of course. For instance, LRANGE returns a range from the list, or the whole list.
 
     LRANGE mylist 0 1 => c,b
 
-LRANGE uses zero-based indexes - that is the first element is 0, the second 1, and so on. The command arguments are `LRANGE key first-index last-index`. The _last-index_ argument can be negative, with a special meaning: -1 is the last element of the list, -2 the penultimate, and so on. So, to get the whole list use:
+LRANGE uses zero-based indexes - that is the first element is 0, the second 1, and so on. 
+The command arguments are `LRANGE key first-index last-index`. 
+The _last-index_ argument can be negative, with a special meaning: -1 is the last element of the list, -2 the penultimate, and so on. So, to get the whole list use:
 
     LRANGE mylist 0 -1 => c,b,a
 
@@ -92,7 +105,11 @@ Sorted Sets, which are kind of a more capable version of Sets, it is better
 to start introducing Sets first (which are a very useful data structure
 per se), and later Sorted Sets.
 
-There are more data types than just Lists. Redis also supports Sets, which are unsorted collections of elements. It is possible to add, remove, and test for existence of members, and perform the intersection between different Sets. Of course it is possible to get the elements of a Set. Some examples will make it more clear. Keep in mind that `SADD` is the _add to set_ operation, `SREM` is the _remove from set_ operation, _sismember_ is the _test if member_ operation, and `SINTER` is the _perform intersection_ operation. Other operations are `SCARD` to get the cardinality (the number of elements) of a Set, and `SMEMBERS` to return all the members of a Set.
+There are more data types than just Lists. Redis also supports Sets, which are unsorted collections of elements. 
+It is possible to add, remove, and test for existence of members, and perform the intersection between different Sets. 
+Of course it is possible to get the elements of a Set.  Some examples will make it more clear. 
+Keep in mind that `SADD` is the _add to set_ operation, `SREM` is the _remove from set_ operation, _sismember_ is the _test if member_ operation, and `SINTER` is the _perform intersection_ operation. 
+Other operations are `SCARD` to get the cardinality (the number of elements) of a Set, and `SMEMBERS` to return all the members of a Set.
 
     SADD myset a
     SADD myset b
@@ -101,7 +118,8 @@ There are more data types than just Lists. Redis also supports Sets, which are u
     SCARD myset => 4
     SMEMBERS myset => bar,a,foo,b
 
-Note that `SMEMBERS` does not return the elements in the same order we added them since Sets are *unsorted* collections of elements. When you want to store in order it is better to use Lists instead. Some more operations against Sets:
+Note that `SMEMBERS` does not return the elements in the same order we added them since Sets are *unsorted* collections of elements. 
+When you want to store in order it is better to use Lists instead. Some more operations against Sets:
 
     SADD mynewset b
     SADD mynewset foo
@@ -187,7 +205,8 @@ Let's start with Users. We need to represent users, of course, with their userna
 we store the password in clear text.*
 
 We use the `next_user_id` key in order to always get a unique ID for every new user. Then we use this unique ID to name the key holding a Hash with user's data. *This is a common design pattern* with key-values stores! Keep it in mind.
-Besides the fields already defined, we need some more stuff in order to fully define a User. For example, sometimes it can be useful to be able to get the user ID from the username, so every time we add a user, we also populate the `users` key, which is a Hash, with the username as field, and its ID as value.
+Besides the fields already defined, we need some more stuff in order to fully define a User. 
+For example, sometimes it can be useful to be able to get the user ID from the username, so every time we add a user, we also populate the `users` key, which is a Hash, with the username as field, and its ID as value.
 
     HSET users antirez 1000
 
@@ -433,7 +452,9 @@ You can find the code that sets or removes a following / follower relation in th
 Making it horizontally scalable
 ---
 
-Gentle reader, if you read till this point you are already a hero. Thank you. Before talking about scaling horizontally it is worth checking performance on a single server. Retwis is *extremely fast*, without any kind of cache. On a very slow and loaded server, an Apache benchmark with 100 parallel clients issuing 100000 requests measured the average pageview to take 5 milliseconds. This means you can serve millions of users every day with just a single Linux box, and this one was monkey ass slow... Imagine the results with more recent hardware.
+Gentle reader, if you read till this point you are already a hero. Thank you. Before talking about scaling horizontally it is worth checking performance on a single server. 
+Retwis is *extremely fast*, without any kind of cache. On a very slow and loaded server, an Apache benchmark with 100 parallel clients issuing 100000 requests measured the average pageview to take 5 milliseconds. 
+This means you can serve millions of users every day with just a single Linux box, and this one was monkey ass slow... Imagine the results with more recent hardware.
 
 However you can't go with a single server forever, how do you scale a key-value
 store?

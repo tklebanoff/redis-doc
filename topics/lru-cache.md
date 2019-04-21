@@ -96,7 +96,8 @@ However since Redis 3.0 the algorithm was improved to also take a pool of good
 candidates for eviction. This improved the performance of the algorithm, making
 it able to approximate more closely the behavior of a real LRU algorithm.
 
-What is important about the Redis LRU algorithm is that you **are able to tune** the precision of the algorithm by changing the number of samples to check for every eviction. This parameter is controlled by the following configuration directive:
+What is important about the Redis LRU algorithm is that you **are able to tune** the precision of the algorithm by changing the number of samples to check for every eviction. 
+This parameter is controlled by the following configuration directive:
 
     maxmemory-samples 5
 
@@ -107,7 +108,9 @@ the LRU approximation used by Redis compares with true LRU.
 
 ![LRU comparison](http://redis.io/images/redisdoc/lru_comparison.png)
 
-The test to generate the above graphs filled a Redis server with a given number of keys. The keys were accessed from the first to the last, so that the first keys are the best candidates for eviction using an LRU algorithm. Later more 50% of keys are added, in order to force half of the old keys to be evicted.
+The test to generate the above graphs filled a Redis server with a given number of keys. 
+The keys were accessed from the first to the last, so that the first keys are the best candidates for eviction using an LRU algorithm. 
+Later more 50% of keys are added, in order to force half of the old keys to be evicted.
 
 You can see three kind of dots in the graphs, forming three distinct bands.
 
@@ -115,12 +118,14 @@ You can see three kind of dots in the graphs, forming three distinct bands.
 * The gray band are objects that were not evicted.
 * The green band are objects that were added.
 
-In a theoretical LRU implementation we expect that, among the old keys, the first half will be expired. The Redis LRU algorithm will instead only *probabilistically* expire the older keys.
+In a theoretical LRU implementation we expect that, among the old keys, the first half will be expired. 
+The Redis LRU algorithm will instead only *probabilistically* expire the older keys.
 
-As you can see Redis 3.0 does a better job with 5 samples compared to Redis 2.8, however most objects that are among the latest accessed are still retained by Redis 2.8. Using a sample size of 10 in Redis 3.0 the approximation is very close to the theoretical performance of Redis 3.0.
+As you can see Redis 3.0 does a better job with 5 samples compared to Redis 2.8, however most objects that are among the latest accessed are still retained by Redis 2.8. 
+Using a sample size of 10 in Redis 3.0 the approximation is very close to the theoretical performance of Redis 3.0.
 
-Note that LRU is just a model to predict how likely a given key will be accessed in the future. Moreover, if your data access pattern closely
-resembles the power law, most of the accesses will be in the set of keys that
+Note that LRU is just a model to predict how likely a given key will be accessed in the future. 
+Moreover, if your data access pattern closely resembles the power law, most of the accesses will be in the set of keys that
 the LRU approximated algorithm will be able to handle well.
 
 In simulations we found that using a power law access pattern, the difference between true LRU and Redis approximation were minimal or non-existent.
@@ -140,19 +145,22 @@ hits/misses ratio) in certain cases, since using LFU Redis will try to track
 the frequency of access of items, so that the ones used rarely are evicted while
 the one used often have an higher chance of remaining in memory.
 
-If you think at LRU, an item that was recently accessed but is actually almost never requested, will not get expired, so the risk is to evict a key that has an higher chance to be requested in the future. LFU does not have this problem, and in general should adapt better to different access patterns.
+If you think at LRU, an item that was recently accessed but is actually almost never requested, will not get expired, 
+so the risk is to evict a key that has an higher chance to be requested in the future. LFU does not have this problem, and in general should adapt better to different access patterns.
 
 To configure the LFU mode, the following policies are available:
 
 * `volatile-lfu` Evict using approximated LFU among the keys with an expire set.
 * `allkeys-lfu` Evict any key using approximated LFU.
 
-LFU is approximated like LRU: it uses a probabilistic counter, called a [Morris counter](https://en.wikipedia.org/wiki/Approximate_counting_algorithm) in order to estimate the object access frequency using just a few bits per object, combined with a decay period so that the counter is reduced over time: at some point we no longer want to consider keys as frequently accessed, even if they were in the past, so that the algorithm can adapt to a shift in the access pattern.
+LFU is approximated like LRU: it uses a probabilistic counter, called a [Morris counter](https://en.wikipedia.org/wiki/Approximate_counting_algorithm) in order to estimate the object access frequency using just a few bits per object, 
+combined with a decay period so that the counter is reduced over time: at some point we no longer want to consider keys as frequently accessed, even if they were in the past, so that the algorithm can adapt to a shift in the access pattern.
 
 Those informations are sampled similarly to what happens for LRU (as explained in the previous section of this documentation) in order to select a candidate for eviction.
 
 However unlike LRU, LFU has certain tunable parameters: for instance, how fast
-should a frequent item lower in rank if it gets no longer accessed? It is also possible to tune the Morris counters range in order to better adapt the algorithm to specific use cases.
+should a frequent item lower in rank if it gets no longer accessed? 
+It is also possible to tune the Morris counters range in order to better adapt the algorithm to specific use cases.
 
 By default Redis 4.0 is configured to:
 

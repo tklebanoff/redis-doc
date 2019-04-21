@@ -40,8 +40,11 @@ considered as unspecified.
 
 However Redis does the following two things when serving clients:
 
-* It only performs a single `read()` system call every time there is something new to read from the client socket, in order to ensure that if we have multiple clients connected, and a few are very demanding clients sending queries at an high rate, other clients are not penalized and will not experience a bad latency figure.
-* However once new data is read from a client, all the queries contained in the current buffers are processed sequentially. This improves locality and does not need iterating a second time to see if there are clients that need some processing time.
+* It only performs a single `read()` system call every time there is something new to read from the client socket, in order to ensure that if we have multiple clients connected, and a few are very 
+  demanding clients sending queries at an high rate, other clients are not penalized and will not experience a bad latency figure.
+
+* However once new data is read from a client, all the queries contained in the current buffers are processed sequentially. 
+  This improves locality and does not need iterating a second time to see if there are clients that need some processing time.
 
 Maximum number of clients
 ---
@@ -111,7 +114,9 @@ It is possible to change the limit at runtime using the `CONFIG SET` command or 
 Query buffer hard limit
 ---
 
-Every client is also subject to a query buffer limit. This is a non-configurable hard limit that will close the connection when the client query buffer (that is the buffer we use to accumulate commands from the client) reaches 1 GB, and is actually only an extreme limit to avoid a server crash in case of client or server software bugs.
+Every client is also subject to a query buffer limit. 
+This is a non-configurable hard limit that will close the connection when the client query buffer (that is the buffer we use to accumulate commands from the client) reaches 1 GB, 
+and is actually only an extreme limit to avoid a server crash in case of client or server software bugs.
 
 Client timeouts
 ---
@@ -131,7 +136,8 @@ Even if by default connections are not subject to timeout, there are two conditi
 * Mission critical applications where a bug in the client software may saturate the Redis server with idle connections, causing service disruption.
 * As a debugging mechanism in order to be able to connect with the server if a bug in the client software saturates the server with idle connections, making it impossible to interact with the server.
 
-Timeouts are not to be considered very precise: Redis avoids to set timer events or to run O(N) algorithms in order to check idle clients, so the check is performed incrementally from time to time. This means that it is possible that while the timeout is set to 10 seconds, the client connection will be closed, for instance, after 12 seconds if many clients are connected at the same time.
+Timeouts are not to be considered very precise: Redis avoids to set timer events or to run O(N) algorithms in order to check idle clients, so the check is performed incrementally from time to time. 
+This means that it is possible that while the timeout is set to 10 seconds, the client connection will be closed, for instance, after 12 seconds if many clients are connected at the same time.
 
 CLIENT command
 ---
@@ -168,4 +174,6 @@ latency issues.
 TCP keepalive
 ---
 
-Recent versions of Redis (3.2 or greater) have TCP keepalive (`SO_KEEPALIVE` socket option) enabled by default and set to about 300 seconds. This option is useful in order to detect dead peers (clients that cannot be reached even if they look connected). Moreover, if there is network equipment between clients and servers that need to see some traffic in order to take the connection open, the option will prevent unexpected connection closed events.
+Recent versions of Redis (3.2 or greater) have TCP keepalive (`SO_KEEPALIVE` socket option) enabled by default and set to about 300 seconds. 
+This option is useful in order to detect dead peers (clients that cannot be reached even if they look connected). 
+Moreover, if there is network equipment between clients and servers that need to see some traffic in order to take the connection open, the option will prevent unexpected connection closed events.
